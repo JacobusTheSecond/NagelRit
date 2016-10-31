@@ -18,5 +18,13 @@
     <ClCompile Include="LargeInt.c">
       <Filter>Ressourcendateien</Filter>
     </ClCompile>
+    <ClCompile Include="main.c">
+      <Filter>Ressourcendateien</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LargeInt.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
