@@ -1,12 +1,21 @@
 #include "LargeInt.h"
 #include <assert.h>
+#define max(a,b) \ 
+	({__typeof__ (a) _a = (a);\
+	  __typeof__ (b) _b = (b);\
+	  _a > _b? _a : _b;})
 
-inline char Char_SymToByte(char symbol)
+#define min(a,b) \ 
+	({__typeof__ (a) _a = (a);\
+	  __typeof__ (b) _b = (b);\
+	  _a < _b? _a : _b;})
+
+char Char_SymToByte(char symbol)
 {
 	return (symbol - 48);
 }
 
-inline char Char_HexToByte(char symbol)
+char Char_HexToByte(char symbol)
 {
 	if (symbol > 0x2f && symbol < 0x3a) //bereich von "0" bis "9"
 		return symbol - 48;
@@ -17,7 +26,7 @@ inline char Char_HexToByte(char symbol)
 }
 
 //char * symbol as [char X, char Y] = 0xXY
-inline char Char_2HexToByte(char symbol[2])
+char Char_2HexToByte(char symbol[2])
 {
 	return Char_HexToByte(symbol[0]) << 4 | Char_HexToByte(symbol[1]);
 }
@@ -48,5 +57,49 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, int size)
 		string++;
 	}
 
+	return result;
+}
+
+
+struct LargeInt * add(struct LargeInt* lia,struct LargeInt* lib)
+{
+        int iterator_max = max(lia->size,lib->size);
+	struct LargeInt* longerOne;	
+	if(iterator_max == lia->size){
+		longerOne = lia;
+	}else{
+		longerOne = lib;
+	}
+        char carry;
+	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
+	result->LInt = (char*)malloc(iterator_max + 1);
+        int sumcheck;
+        for(int i=0; i<=iterator_max; ++i)
+        {
+                if(i < min(lia->size,lib->size))
+                {
+                        sumcheck = lia->LInt[i] + lia->LInt[i] + carry;
+			result->LInt[i] = (char)(sumcheck % 256);
+			if(sumcheck > 255){
+				carry = 0x01;
+			}
+                        printf("%d\n",sumcheck);
+                }
+		else if(i<iterator_max){
+			sumcheck = longerOne->LInt[i] + carry;
+			result->LInt[i] = (char)(sumcheck % 256);
+			if(sumcheck > 255){
+				carry = 0x01;
+			}
+			printf("%d\n",sumcheck);
+		}else if(i == iterator_max){
+			if(carry== 0x0){
+				realloc(result->LInt,iterator_max);
+			}else{
+				result->LInt[i] = carry;
+			}
+			printf("%d\n",sumcheck);
+		}
+	}
 	return result;
 }
