@@ -1,5 +1,14 @@
 #include "LargeInt.h"
 #include <assert.h>
+#define max(a,b) \ 
+	({__typeof__ (a) _a = (a);\
+	  __typeof__ (b) _b = (b);\
+	  _a > _b? _a : _b;})
+
+#define min(a,b) \ 
+	({__typeof__ (a) _a = (a);\
+	  __typeof__ (b) _b = (b);\
+	  _a < _b? _a : _b;})
 
 char Char_SymToByte(char symbol)
 {
@@ -60,6 +69,50 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, int size)
 		string++;
 	}
 
+	return result;
+}
+
+
+struct LargeInt * add(struct LargeInt* lia,struct LargeInt* lib)
+{
+        int iterator_max = max(lia->size,lib->size);
+	struct LargeInt* longerOne;	
+	if(iterator_max == lia->size){
+		longerOne = lia;
+	}else{
+		longerOne = lib;
+	}
+        char carry;
+	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
+	result->LInt = (char*)malloc(iterator_max + 1);
+        int sumcheck;
+        for(int i=0; i<=iterator_max; ++i)
+        {
+                if(i < min(lia->size,lib->size))
+                {
+                        sumcheck = lia->LInt[i] + lia->LInt[i] + carry;
+			result->LInt[i] = (char)(sumcheck % 256);
+			if(sumcheck > 255){
+				carry = 0x01;
+			}
+                        printf("%d\n",sumcheck);
+                }
+		else if(i<iterator_max){
+			sumcheck = longerOne->LInt[i] + carry;
+			result->LInt[i] = (char)(sumcheck % 256);
+			if(sumcheck > 255){
+				carry = 0x01;
+			}
+			printf("%d\n",sumcheck);
+		}else if(i == iterator_max){
+			if(carry== 0x0){
+				realloc(result->LInt,iterator_max);
+			}else{
+				result->LInt[i] = carry;
+			}
+			printf("%d\n",sumcheck);
+		}
+	}
 	return result;
 }
 

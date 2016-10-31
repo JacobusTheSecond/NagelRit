@@ -6,10 +6,10 @@ typedef struct LargeInt LargeInt;
 
 int main()
 {
-	LargeInt * li = NEW_LargeInt_from_str("0x0102030405060708091011121314151617181920", 0);
-	printf("%s\n", li->LInt);
-
+	LargeInt * lia = NEW_LargeInt_from_str("0xff", 0);
+	LargeInt * lib = NEW_LargeInt_from_str("0xff", 0);
+	//printf("%s\n", li->LInt);
+	LargeInt * lic = add(lia,lib);
 	
-	system("pause");
 	return EXIT_SUCCESS;
 }

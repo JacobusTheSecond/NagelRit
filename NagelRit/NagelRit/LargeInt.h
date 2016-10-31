@@ -6,4 +6,5 @@ struct LargeInt {
 };
 
 struct LargeInt * NEW_LargeInt_from_str(const char * string, int size);
+struct LargeInt * add(struct LargeInt* lia,struct LargeInt* lib);
 char * LargeIntToString(struct LargeInt * LInt);
