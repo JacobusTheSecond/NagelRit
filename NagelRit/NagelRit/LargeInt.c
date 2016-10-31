@@ -1,12 +1,12 @@
 #include "LargeInt.h"
 #include <assert.h>
 
-inline char Char_SymToByte(char symbol)
+char Char_SymToByte(char symbol)
 {
 	return (symbol - 48);
 }
 
-inline char Char_HexToByte(char symbol)
+char Char_HexToByte(char symbol)
 {
 	if (symbol > 0x2f && symbol < 0x3a) //bereich von "0" bis "9"
 		return symbol - 48;
@@ -16,8 +16,18 @@ inline char Char_HexToByte(char symbol)
 		return symbol - 97 + 10;
 }
 
+char Char_ByteToHex(char hex)
+{
+	char rest = hex % 0xf0;
+	hex = (hex - rest) >> 4;
+	if (hex >= 0 && hex < 10)
+		return hex + 48;
+	else if (hex >= 10 && hex < 16)
+		return hex + 97 - 10;
+}
+
 //char * symbol as [char X, char Y] = 0xXY
-inline char Char_2HexToByte(char symbol[2])
+char Char_2HexToByte(char symbol[2])
 {
 	return Char_HexToByte(symbol[0]) << 4 | Char_HexToByte(symbol[1]);
 }
@@ -33,6 +43,8 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, int size)
 
 	assert(size > 2);
 	//first to chars are 0x
+	assert(string[0] == '0' && string[1] == 'x');
+	//hex prefix
 
 	struct LargeInt * result = (struct LargeInt *)malloc(sizeof(struct LargeInt));
 	size = (size - 1) / 2; //(size - 2) /2 + 0.5 (ceil)
@@ -49,4 +61,14 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, int size)
 	}
 
 	return result;
+}
+
+char * LargeIntToString(struct LargeInt * LInt)
+{
+	char * result = (char*)malloc(LInt->size * 2);
+	int i, j = 0;
+	for (i = LInt->size - 1; i >= 0; i++)
+	{
+		result[j] = Char_ByteToHex(LInt->LInt[i]);
+	}
 }
