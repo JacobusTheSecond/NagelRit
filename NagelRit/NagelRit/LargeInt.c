@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-/*
+
 #define max(a,b) \
 		({__typeof__ (a) _a = (a); \
 		__typeof__ (b) _b = (b); \
@@ -12,7 +12,7 @@
 		({__typeof__ (a) _a = (a); \
 		__typeof__ (b) _b = (b); \
 		_a < _b ? _a : _b;})
-*/
+
 
 char Char_SymToByte(char symbol)
 {
@@ -21,8 +21,9 @@ char Char_SymToByte(char symbol)
 
 char Char_HexToByte(char symbol)
 {
+	//printf("%c %d\n",symbol,(int)symbol);
 	if (symbol > 0x2f && symbol < 0x3a) //bereich von "0" bis "9"
-		return symbol - 48;
+		return symbol - '0';
 	else if (symbol > 0x40 && symbol < 0x47)//bereich von "A" bis "F"
 		return symbol - 65 + 10;
 	else if (symbol > 0x60 && symbol < 0x67)//bereich von "a" bis "f"
@@ -100,6 +101,8 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 			result->LInt[i] = (char)(sumcheck % 256);
 			if (sumcheck > 255) {
 				carry = 0x01;
+			}else{
+				carry = 0x00;
 			}
 			//printf("%d\n", sumcheck);
 		}
@@ -108,6 +111,8 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 			result->LInt[i] = (char)(sumcheck % 256);
 			if (sumcheck > 255) {
 				carry = 0x01;
+			}else{
+				carry = 0x00;
 			}
 			//printf("%d\n", sumcheck);
 		}
@@ -139,6 +144,11 @@ char * LargeIntToString_Hex(struct LargeInt * lint)
 		j += 2;
 	}
 	return result - 2;
+}
+
+void destructor(struct LargeInt * li){
+	free(li->LInt);
+	free(li);
 }
 
 char * LargeIntToString_Dec(struct LargeInt * lint)
