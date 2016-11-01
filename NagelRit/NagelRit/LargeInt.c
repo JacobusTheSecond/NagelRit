@@ -190,6 +190,35 @@ void destructor(struct LargeInt * li){
 	free(li->LInt);
 	free(li);
 }
+
+struct LargeInt * bitshiftup(struct LargeInt * li, integer amount){
+	if(amount =< 0){	
+		assert(0);
+	}
+	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));	
+	char* byteadjustedpointer;
+	if(amount > 8){
+		result->LInt = calloc(li->size + amount/8 + 1 , 1);
+		byteadjustedpointer = result->LInt + amount/8;
+		amount = amount % 8;
+	}else{
+		byteadjustedpointer = result->LInt;
+		result->LInt = malloc(li->size + 1);
+	}
+	
+	char carry = 0x0;
+	short currbyte;
+	for(int i = 0; i<li->size;++i){
+		currbyte = (short)li->LInt[i];
+		currbyte = (currbyte << amount);
+		byteadjustedpointer[i] = currbyte | carry;
+		carry = currbyte >> 8;
+	}
+	if(carry != 0x0){
+		byteadjustedpointer[li->size] = carry;
+	}
+	return result;
+}
 /* TODO: recieves a LargeInt and returns a String, depicting the decimal value of the array
    {&(0x30),1} -> "48"
 */
