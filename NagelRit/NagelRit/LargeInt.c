@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
 
 #define max(a,b) \
 		({__typeof__ (a) _a = (a); \
@@ -13,12 +14,22 @@
 		__typeof__ (b) _b = (b); \
 		_a < _b ? _a : _b;})
 
+#else
+#define max(a,b) __max(a,b)
+#define min(a,b) __min(a,b)
+#endif
+
 
 char Char_SymToByte(char symbol)
 {
 	return (symbol - 48);
 }
 
+/* recieves a char, and returns its corresponding value as a byte
+   '3' -> 0x3
+   'F' -> 0xf
+   this is needed, for creating the bitfield from a string
+*/
 char Char_HexToByte(char symbol)
 {
 	//printf("%c %d\n",symbol,(int)symbol);
@@ -32,6 +43,11 @@ char Char_HexToByte(char symbol)
 	return 0;
 }
 
+/* recieves a char, inwhich two hex-digits are stored, and returns
+   it as two chars in a byte
+   0xf4 -> (short)"F4"
+   short is not optimal here, as the size may vary from 2 bytes
+*/
 short Char_ByteToHex(char hex)
 {
 	char low = hex & 0x0f;
@@ -47,14 +63,24 @@ short Char_ByteToHex(char hex)
 	return (short)low << 8 | (short)hex;
 }
 
-//char * symbol as [char X, char Y] = 0xXY
+/* parses two chars into their corresponding value in hex, and
+   concatenates them into one byte
+   "AF" -> (char)0xaf
+*/
 char Char_2HexToByte(char symbol[2])
 {
 	return Char_HexToByte(symbol[0]) << 4 | Char_HexToByte(symbol[1]);
 }
 
 
+/* recieves a string, which will be parsed into their corresponding hex
+   values and returns a pointer to the struct, containing a pointer to
+   the bitfield stored as a char array, and the size
+   ("0x1234",0) -> {&(0x1234),2}
 
+   TODO:support for an uneven amount of chars, as only char_2HexToByte
+        is called
+*/
 struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 {
 	if (size == 0) {
@@ -84,7 +110,9 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 	return result;
 }
 
-
+/* adds two LargeInts and returns their sum as a new LargeInt which has
+   to be properly destructed as well.
+*/
 struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 {
 	int iterator_max = max(lia->size, lib->size);
@@ -93,6 +121,11 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
 	result->LInt = (char*)malloc(iterator_max + 1);
 	int sumcheck;
+
+	/* iterates through both LargeInts simultaneously, and
+	   1. adds their 2 bytes + carry from last byte, if neither array is at their end yet
+	   2. adds the carry and the byte from the longer one, if one array is at the end
+	   3. appends the carry, or cuts the length, if both are at the end, depending on the carry*/
 	for (int i = 0; i <= iterator_max; ++i)
 	{
 		if (i < min(lia->size, lib->size))
@@ -130,6 +163,10 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 	return result;
 }
 
+/* recieves a LargeInt and returns a String, depicting the hexvalues of
+   the array
+   {&(0x1274),2} -> "1274"
+*/
 char * LargeIntToString_Hex(struct LargeInt * lint)
 {
 	char * result = (char*)malloc(lint->size * 2 + 3);
@@ -146,11 +183,15 @@ char * LargeIntToString_Hex(struct LargeInt * lint)
 	return result - 2;
 }
 
+/* frees the array, and the LargeInt itself, as both have been malloc'd in their life cycle
+*/
 void destructor(struct LargeInt * li){
 	free(li->LInt);
 	free(li);
 }
-
+/* TODO: recieves a LargeInt and returns a String, depicting the decimal value of the array
+   {&(0x30),1} -> "48"
+*/
 char * LargeIntToString_Dec(struct LargeInt * lint)
 {
 
