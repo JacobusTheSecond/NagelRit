@@ -1,14 +1,18 @@
 #include "LargeInt.h"
 #include <assert.h>
-#define max(a,b) \ 
-	({__typeof__ (a) _a = (a);\
-	  __typeof__ (b) _b = (b);\
-	  _a > _b? _a : _b;})
+#include <stdio.h>
+#include <stdlib.h>
+/*
+#define max(a,b) \
+		({__typeof__ (a) _a = (a); \
+		__typeof__ (b) _b = (b); \
+		 _a > _b ? _a : _b;})
 
-#define min(a,b) \ 
-	({__typeof__ (a) _a = (a);\
-	  __typeof__ (b) _b = (b);\
-	  _a < _b? _a : _b;})
+#define min(a,b) \
+		({__typeof__ (a) _a = (a); \
+		__typeof__ (b) _b = (b); \
+		_a < _b ? _a : _b;})
+*/
 
 char Char_SymToByte(char symbol)
 {
@@ -23,16 +27,23 @@ char Char_HexToByte(char symbol)
 		return symbol - 65 + 10;
 	else if (symbol > 0x60 && symbol < 0x67)//bereich von "a" bis "f"
 		return symbol - 97 + 10;
+	assert(0);
+	return 0;
 }
 
-char Char_ByteToHex(char hex)
+short Char_ByteToHex(char hex)
 {
-	char rest = hex % 0xf0;
-	hex = (hex - rest) >> 4;
+	char low = hex & 0x0f;
+	hex = hex >> 4 & 0x0f;
 	if (hex >= 0 && hex < 10)
-		return hex + 48;
+		hex += 48;
 	else if (hex >= 10 && hex < 16)
-		return hex + 97 - 10;
+		hex += 65 - 10;
+	if (low >= 0 && low < 10)
+		low += 48;
+	else if (low >= 10 && low < 16)
+		low += 65 - 10;
+	return (short)low << 8 | (short)hex;
 }
 
 //char * symbol as [char X, char Y] = 0xXY
@@ -43,7 +54,7 @@ char Char_2HexToByte(char symbol[2])
 
 
 
-struct LargeInt * NEW_LargeInt_from_str(const char * string, int size)
+struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 {
 	if (size == 0) {
 		while (string[size++] != 0);
@@ -73,55 +84,64 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, int size)
 }
 
 
-struct LargeInt * add(struct LargeInt* lia,struct LargeInt* lib)
+struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 {
-        int iterator_max = max(lia->size,lib->size);
-	struct LargeInt* longerOne;	
-	if(iterator_max == lia->size){
-		longerOne = lia;
-	}else{
-		longerOne = lib;
-	}
-        char carry;
+	int iterator_max = max(lia->size, lib->size);
+	struct LargeInt * longerOne = (lia->size > lib->size) ? lia : lib;
+	char carry = 0;
 	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
 	result->LInt = (char*)malloc(iterator_max + 1);
-        int sumcheck;
-        for(int i=0; i<=iterator_max; ++i)
-        {
-                if(i < min(lia->size,lib->size))
-                {
-                        sumcheck = lia->LInt[i] + lia->LInt[i] + carry;
+	int sumcheck;
+	for (int i = 0; i <= iterator_max; ++i)
+	{
+		if (i < min(lia->size, lib->size))
+		{
+			sumcheck = lia->LInt[i] + lib->LInt[i] + carry;
 			result->LInt[i] = (char)(sumcheck % 256);
-			if(sumcheck > 255){
+			if (sumcheck > 255) {
 				carry = 0x01;
 			}
-                        printf("%d\n",sumcheck);
-                }
-		else if(i<iterator_max){
+			//printf("%d\n", sumcheck);
+		}
+		else if (i < iterator_max) {
 			sumcheck = longerOne->LInt[i] + carry;
 			result->LInt[i] = (char)(sumcheck % 256);
-			if(sumcheck > 255){
+			if (sumcheck > 255) {
 				carry = 0x01;
 			}
-			printf("%d\n",sumcheck);
-		}else if(i == iterator_max){
-			if(carry== 0x0){
-				realloc(result->LInt,iterator_max);
-			}else{
-				result->LInt[i] = carry;
+			//printf("%d\n", sumcheck);
+		}
+		else if (i == iterator_max) {
+			if (carry == 0x0) {
+				realloc(result->LInt, iterator_max);
+				result->size = iterator_max;
 			}
-			printf("%d\n",sumcheck);
+			else {
+				result->LInt[i] = carry;
+				result->size = iterator_max + 1;
+			}
 		}
 	}
 	return result;
 }
 
-char * LargeIntToString(struct LargeInt * LInt)
+char * LargeIntToString_Hex(struct LargeInt * lint)
 {
-	char * result = (char*)malloc(LInt->size * 2);
+	char * result = (char*)malloc(lint->size * 2 + 3);
+	result[lint->size * 2 + 2] = 0;
+	result[0] = '0';
+	result[1] = 'x';
+	result += 2;
 	int i, j = 0;
-	for (i = LInt->size - 1; i >= 0; i++)
+	for (i = lint->size - 1; i >= 0; i--)
 	{
-		result[j] = Char_ByteToHex(LInt->LInt[i]);
+		*(short*)(result + j) = Char_ByteToHex(lint->LInt[i]);
+		j += 2;
 	}
+	return result - 2;
+}
+
+char * LargeIntToString_Dec(struct LargeInt * lint)
+{
+
 }
