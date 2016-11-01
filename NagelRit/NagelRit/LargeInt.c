@@ -44,7 +44,7 @@ char Char_HexToByte(char symbol)
 }
 
 /* recieves a char, inwhich two hex-digits are stored, and returns
-   it as two chars in a byte
+   it as two chars in a twi bytes
    0xf4 -> (short)"F4"
    short is not optimal here, as the size may vary from 2 bytes
 */
@@ -128,6 +128,7 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 	   3. appends the carry, or cuts the length, if both are at the end, depending on the carry*/
 	for (int i = 0; i <= iterator_max; ++i)
 	{
+		//first case
 		if (i < min(lia->size, lib->size))
 		{
 			sumcheck = lia->LInt[i] + lib->LInt[i] + carry;
@@ -137,8 +138,8 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 			}else{
 				carry = 0x00;
 			}
-			//printf("%d\n", sumcheck);
 		}
+		//second case
 		else if (i < iterator_max) {
 			sumcheck = longerOne->LInt[i] + carry;
 			result->LInt[i] = (char)(sumcheck % 256);
@@ -147,8 +148,8 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 			}else{
 				carry = 0x00;
 			}
-			//printf("%d\n", sumcheck);
 		}
+		//third case
 		else if (i == iterator_max) {
 			if (carry == 0x0) {
 				realloc(result->LInt, iterator_max);
@@ -165,7 +166,7 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 
 /* recieves a LargeInt and returns a String, depicting the hexvalues of
    the array
-   {&(0x1274),2} -> "1274"
+   {&(0x1274),2} -> "0x1274"
 */
 char * LargeIntToString_Hex(struct LargeInt * lint)
 {
