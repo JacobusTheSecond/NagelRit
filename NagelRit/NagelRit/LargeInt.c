@@ -241,44 +241,28 @@ struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib){
 	short addbyte = 0x0;
 	short currbyte = 0x0;
 	for(int i=0;i<iterator_min;++i){
-		printf("i = %d\n",i);
 		currbyte = (short)shorterOne->LInt[i];
 		for(int bitit = 0; bitit < 8;bitit++){
-			printf("\n   bitit = %d\n",bitit);
-			printf("   currbyte = %d\n",currbyte);
 			short bit = (short) currbyte & 0x1;
-			printf("   bit = %d\n",bit);
 			if(bit==1){
 				//result add longerOne << bitit
-				printf("      lO.size = %d\n",longerOne->size);
 				for(int j=0;j<longerOne->size || addcarry != 0x0 || shiftcarry !=0x0;++j){
-					printf("      j = %d\n",j);
 					if(j<longerOne->size){
 						addbyte = longerOne->LInt[j];
-						printf("         addbyte = %d\n",addbyte);
 						addbyte = addbyte << bitit;
-						printf("         addbyte = %d\n",addbyte);
 					
 						//result[byteadjust+i] += (longerOne[j] << bitit) + addcarry + shiftcarry
 						placeholder = result->LInt[i+j] + (addbyte & 0xff) + addcarry + shiftcarry;
-						printf("         result->LInt[i+j] = %d\n",result->LInt[i+j]);
-						printf("         (addbyte & 0xff) = %d\n",(addbyte & 0xff));
-						printf("         placeholder = %d\n",placeholder);
 						addcarry = placeholder >> 8;
-						printf("         addcarry = %d\n",addcarry);
 						result->LInt[i+j] = placeholder % 0x100;
 						shiftcarry = addbyte >> 8;
-						printf("         shiftcarry = %d\n",shiftcarry);
 					}else{
-						printf("         addcarry = %d\n",addcarry);
 						placeholder = result->LInt[i+j] + addcarry + shiftcarry;
-						printf("         placeholder = %d\n",placeholder);
 						addcarry = placeholder >> 8;
 						result->LInt[i+j] = placeholder % 0x100;
 						shiftcarry = 0x0;
 
 					}
-					printf("      result = %d %d\n",(short)result->LInt[0], (short)result ->LInt[1]);
 				}
 			}
 			currbyte = currbyte >> 1;
@@ -286,6 +270,34 @@ struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib){
 		}
 	}
 	cutEnd(result);
+	return result;
+}
+
+struct LargeInt * oneTenth(int length){
+	struct LargeInt * oneTenth = (struct LargeInt *)malloc(sizeof(struct LargeInt));
+	oneTenth->LInt = malloc(length);
+	oneTenth->size = length;
+	
+	for(int i=0;i<length-1;++i){
+		oneTenth->LInt[i] = 0x99;
+	}
+	oneTenth->LInt[length-1] = 0x19;
+	return oneTenth;
+}
+
+struct LargeInt * divideByTen(struct LargeInt * li){
+	struct LargeInt * oT = oneTenth(li->size);
+	struct LargeInt * ph = mult(li,oT);
+	struct LargeInt * result = (struct LargeInt *)malloc(sizeof(struct LargeInt));
+	result->LInt = malloc(ph->size - li->size + 1);
+	result->size = ph->size-li->size+1;
+
+	for(int i=0 ; i+li->size < ph->size ; ++i){
+		result->LInt[i] = ph->LInt[i+li->size];
+	}
+	cutEnd(result);
+	destructor(oT);
+	destructor(ph);
 	return result;
 }
 
@@ -303,5 +315,24 @@ void cutEnd(struct LargeInt * li){
 */
 char * LargeIntToString_Dec(struct LargeInt * lint)
 {
+	if(lint->size == 0){
+		return "0";
+	}
+	char result[lint->size*2];
+	result[0] = (lint->LInt[0] & 0xf) % 0xa;
+	struct LargeInt* iterator = divideByTen(lint);
+	struct LargeInt* oldLI;
+	int i = 1;
+	while(iterator->size > 0){
 
+		char * str = LargeIntToString_Hex(iterator);
+		printf("%s\n",str);
+		free(str);
+
+		result[i] = (iterator->LInt[0] & 0xf) % 0xa;
+		++i;
+		iterator = divideByTen(iterator);
+	}
+	destructor(iterator);
+	return result;
 }
