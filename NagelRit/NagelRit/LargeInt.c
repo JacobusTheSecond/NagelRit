@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _MSC_VER
+#ifndef _MSC_VER
 
 #define max(a,b) \
 		({__typeof__ (a) _a = (a); \
@@ -191,12 +191,12 @@ void destructor(struct LargeInt * li){
 	free(li);
 }
 
-struct LargeInt * bitshiftup(struct LargeInt * li, integer amount){
-	if(amount =< 0){	
+struct LargeInt * bitshiftup(struct LargeInt * li, int amount){
+	if(amount <= 0){	
 		assert(0);
 	}
 	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));	
-	char* byteadjustedpointer;
+	unsigned char* byteadjustedpointer;
 	if(amount > 8){
 		result->LInt = calloc(li->size + amount/8 + 1 , 1);
 		byteadjustedpointer = result->LInt + amount/8;
@@ -216,8 +216,87 @@ struct LargeInt * bitshiftup(struct LargeInt * li, integer amount){
 	}
 	if(carry != 0x0){
 		byteadjustedpointer[li->size] = carry;
+		result->size = li->size + byteadjustedpointer - result->LInt + 1;
+	}else{
+		result->size = li->size + byteadjustedpointer - result->LInt;
+		result->LInt = realloc(result->LInt,result->size);
 	}
 	return result;
+}
+
+
+struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib){
+	struct LargeInt * result = malloc(sizeof(struct LargeInt));
+	result->LInt = calloc(lia->size + lib->size,1);
+	//TODO cut function at end
+	result->size = lia->size + lib->size;
+
+	int iterator_min = min(lia->size, lib->size);
+	struct LargeInt * shorterOne = (lia->size < lib->size) ? lia : lib;
+	struct LargeInt * longerOne = (lia->size < lib->size) ? lib : lia;
+
+	unsigned char shiftcarry = 0x0;
+	unsigned char addcarry = 0x0;
+	unsigned short placeholder = 0x0;
+	short addbyte = 0x0;
+	short currbyte = 0x0;
+	for(int i=0;i<iterator_min;++i){
+		printf("i = %d\n",i);
+		currbyte = (short)shorterOne->LInt[i];
+		for(int bitit = 0; bitit < 8;bitit++){
+			printf("\n   bitit = %d\n",bitit);
+			printf("   currbyte = %d\n",currbyte);
+			short bit = (short) currbyte & 0x1;
+			printf("   bit = %d\n",bit);
+			if(bit==1){
+				//result add longerOne << bitit
+				printf("      lO.size = %d\n",longerOne->size);
+				for(int j=0;j<longerOne->size || addcarry != 0x0 || shiftcarry !=0x0;++j){
+					printf("      j = %d\n",j);
+					if(j<longerOne->size){
+						addbyte = longerOne->LInt[j];
+						printf("         addbyte = %d\n",addbyte);
+						addbyte = addbyte << bitit;
+						printf("         addbyte = %d\n",addbyte);
+					
+						//result[byteadjust+i] += (longerOne[j] << bitit) + addcarry + shiftcarry
+						placeholder = result->LInt[i+j] + (addbyte & 0xff) + addcarry + shiftcarry;
+						printf("         result->LInt[i+j] = %d\n",result->LInt[i+j]);
+						printf("         (addbyte & 0xff) = %d\n",(addbyte & 0xff));
+						printf("         placeholder = %d\n",placeholder);
+						addcarry = placeholder >> 8;
+						printf("         addcarry = %d\n",addcarry);
+						result->LInt[i+j] = placeholder % 0x100;
+						shiftcarry = addbyte >> 8;
+						printf("         shiftcarry = %d\n",shiftcarry);
+					}else{
+						printf("         addcarry = %d\n",addcarry);
+						placeholder = result->LInt[i+j] + addcarry + shiftcarry;
+						printf("         placeholder = %d\n",placeholder);
+						addcarry = placeholder >> 8;
+						result->LInt[i+j] = placeholder % 0x100;
+						shiftcarry = 0x0;
+
+					}
+					printf("      result = %d %d\n",(short)result->LInt[0], (short)result ->LInt[1]);
+				}
+			}
+			currbyte = currbyte >> 1;
+			if(currbyte == 0)break;
+		}
+	}
+	cutEnd(result);
+	return result;
+}
+
+void cutEnd(struct LargeInt * li){
+	for(int i=li->size-1;i>1;i--){
+		if(li->LInt[i] != 0){
+			li->LInt = realloc(li->LInt, i+1);
+			li->size = i+1;
+			return;
+		}
+	}
 }
 /* TODO: recieves a LargeInt and returns a String, depicting the decimal value of the array
    {&(0x30),1} -> "48"
