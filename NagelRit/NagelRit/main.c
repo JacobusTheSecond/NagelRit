@@ -11,7 +11,7 @@ typedef struct LargeInt LargeInt;
 
 int main()
 {
-	LargeInt * lia = NEW_LargeInt_from_str("0xffabcd", 0);
+	LargeInt * lia = NEW_LargeInt_from_str("0xff", 0);
 	LargeInt * lib = NEW_LargeInt_from_str("0xff0123", 0);
 	LargeInt * lic = add(lia,lib);
 
@@ -54,17 +54,34 @@ int main()
 	str = LargeIntToString_Hex(lij);
 	printf("%s\n", str);
 	free(str);
-	str = LargeIntToString_Dec(lie);
-	printf("%s * ", str);
+	str = LargeIntToString_Dec(lia);
+	printf("%s\n", str);
 	free(str);
-	/*str = LargeIntToString_Dec(lif);
-	printf("%s = ", str);
+	str = LargeIntToString_Dec(lif);
+	printf("%s\n", str);
 	free(str);
 	str = LargeIntToString_Dec(lig);
 	printf("%s\n", str);
-	free(str);*/
+	free(str);
 
+	LargeInt * lik = NEW_LargeInt_from_str("0x0A", 0);
+	LargeInt * lil = NEW_LargeInt_from_str("0x0A", 0);
+	LargeInt * lim; 
 
+	for(int i=0; i<100;++i){
+		lim = lil;
+		lil = mult(lik,lil);
+		str = LargeIntToString_Dec(lil);
+		printf("%s\n", str);
+		free(str);
+		str = LargeIntToString_Hex(lil);
+		printf("%s\n", str);
+		free(str);
+		destructor(lim);
+		
+	}
+
+/*
 	unsigned long long pot = 1;
 	double flut = 1;
 	for (int i = 0; i < 16; i++)
@@ -72,7 +89,7 @@ int main()
 		printf("%llu %lf\n", pot, flut);
 		pot *= 16;
 		flut += 1.205;
-	}
+	}*/
 
 	destructor(lia);
 	destructor(lib);
@@ -83,10 +100,9 @@ int main()
 	destructor(lig);
 	destructor(lih);
 	destructor(lij);
-	/*destructor(lib);
-	destructor(lic);
-	destructor(lid);
-	destructor(lia);
+	destructor(lik);
+	destructor(lil);
+	/*destructor(lia);
 	destructor(lib);
 	destructor(lic);
 	destructor(lid);*/
