@@ -3,16 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef _MSC_VER
-
-#define max(a,b) \
-		({__typeof__ (a) _a = (a); \
-		__typeof__ (b) _b = (b); \
-		 _a > _b ? _a : _b;})
-
-#define min(a,b) \
-		({__typeof__ (a) _a = (a); \
-		__typeof__ (b) _b = (b); \
-		_a < _b ? _a : _b;})
+ #define max(_a,_b) (_a > _b ? _a : _b)
+ #define min(_a,_b) (_a < _b ? _a : _b)
 #endif
 
 
@@ -91,7 +83,7 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 
 	struct LargeInt * result = (struct LargeInt *)malloc(sizeof(struct LargeInt));
 	size = (size - 1) / 2; //(size - 2) /2 + 0.5 (ceil)
-	result->LInt = (char *)malloc(size);
+	result->LInt = (unsigned char *)malloc(size);
 	result->size = size;
 
 	string += 2;
@@ -104,6 +96,19 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 	}
 
 	return result;
+}
+
+
+/* removes the useless back of a LargeInt to remove basically useless memory
+*/
+void cutEnd(struct LargeInt * li) {
+	for (int i = li->size - 1; i >= 0; i--) {
+		if (li->LInt[i] != 0) {
+			li->LInt = realloc(li->LInt, i + 1);
+			li->size = i + 1;
+			return;
+		}
+	}
 }
 
 /* adds two LargeInts and returns their sum as a new LargeInt which has
@@ -262,7 +267,7 @@ struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib) {
 			//printf("   bit = %d\n",bit);
 			if (bit == 1) {
 				//result add longerOne << bitit
-				for (int j = 0; j < longerOne->size || addcarry != 0x0 || shiftcarry != 0x0; ++j) {
+				for (unsigned int j = 0; j < longerOne->size || addcarry != 0x0 || shiftcarry != 0x0; ++j) {
 					//printf("      j = %d\n",j);
 					if (j < longerOne->size) {
 						addbyte = longerOne->LInt[j];
@@ -344,24 +349,13 @@ struct LargeInt * divideByMultAndBitshift(struct LargeInt * li, struct LargeInt 
 	destructor(ph);
 	return result;
 }
-/* removes the useless back of a LargeInt to remove basically useless memory
-*/
-void cutEnd(struct LargeInt * li) {
-	for (int i = li->size - 1; i >= 0; i--) {
-		if (li->LInt[i] != 0) {
-			li->LInt = realloc(li->LInt, i + 1);
-			li->size = i + 1;
-			return;
-		}
-	}
-}
 /* each digit in a hexadecimal number apart from the lowest manipulates the lowest
    digit of the decimal version by a factor of 6. This function takes a character, 
    and checks if it is a halfbyte (only lowest 4 bits are set), and then returns, how
    much the given char in hexadecimal manipulates the decimal lowest digit
 */
 short intFromHalfByte(char a) {
-	if(char > 0x0f)assert(0);
+	if(a > 0x0f)assert(0);
 	return ((short)a) * 6 % 10;
 }
 
@@ -372,7 +366,7 @@ short intFromHalfByte(char a) {
    lowest digit in the decimal version of the hexadecimal LargeInt*/
 char lowestdigitinDec(struct LargeInt * lint) {
 	long long sum = 0;
-	for (int i = 1; i < lint->size; ++i) {
+	for (unsigned int i = 1; i < lint->size; ++i) {
 		sum += intFromHalfByte(lint->LInt[i] & 0x0f) + intFromHalfByte(lint->LInt[i] >> 4 & 0x0f);
 	}
 	sum += (lint->LInt[0] & 0x0f) % 10 + intFromHalfByte(lint->LInt[0] >> 4 & 0x0f);
