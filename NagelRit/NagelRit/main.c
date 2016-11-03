@@ -18,9 +18,9 @@ int main()
 	LargeInt * lie = NEW_LargeInt_from_str("0x0111111111111111", 0);
 	LargeInt * lif = NEW_LargeInt_from_str("0x0111111111111111", 0);
 	LargeInt * lig = mult(lie, lif);
-	LargeInt * lih = divideByTen(lia);
-	LargeInt * lii = divideByTen(lih);
-	LargeInt * lij = divideByTen(lii);
+	//LargeInt * lih = divideByTen(lia);
+	//LargeInt * lii = divideByTen(lih);
+	//LargeInt * lij = divideByTen(lii);
 	char * str = LargeIntToString_Hex(lia);
 	printf("%s\n", str);
 	free(str);
@@ -45,7 +45,7 @@ int main()
 	str = LargeIntToString_Hex(lig);
 	printf("%s\n", str);
 	free(str);
-	str = LargeIntToString_Hex(lih);
+	/*str = LargeIntToString_Hex(lih);
 	printf("%s\n", str);
 	free(str);
 	str = LargeIntToString_Hex(lii);
@@ -54,7 +54,7 @@ int main()
 	str = LargeIntToString_Hex(lij);
 	printf("%s\n", str);
 	free(str);
-	str = LargeIntToString_Dec(lia);
+	*/str = LargeIntToString_Dec(lia);
 	printf("%s\n", str);
 	free(str);
 	str = LargeIntToString_Dec(lif);
@@ -98,8 +98,8 @@ int main()
 	destructor(lie);
 	destructor(lif);
 	destructor(lig);
-	destructor(lih);
-	destructor(lij);
+	/*destructor(lih);
+	destructor(lij);*/
 	destructor(lik);
 	destructor(lil);
 	/*destructor(lia);
