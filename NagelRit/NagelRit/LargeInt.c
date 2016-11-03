@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _MSC_VER
+#ifndef _MSC_VER
 
 #define max(a,b) \
 		({__typeof__ (a) _a = (a); \
@@ -13,10 +13,6 @@
 		({__typeof__ (a) _a = (a); \
 		__typeof__ (b) _b = (b); \
 		_a < _b ? _a : _b;})
-
-#else
-#define max(a,b) __max(a,b)
-#define min(a,b) __min(a,b)
 #endif
 
 
@@ -79,7 +75,7 @@ char Char_2HexToByte(char symbol[2])
    ("0x1234",0) -> {&(0x1234),2}
 
    TODO:support for an uneven amount of chars, as only char_2HexToByte
-        is called
+		is called
 */
 struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 {
@@ -102,7 +98,7 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 	char calc = 0;
 	for (size = 0; size < result->size; size++)
 	{
-		calc = Char_2HexToByte(string + size);
+		calc = Char_2HexToByte((char*)(string + size));
 		result->LInt[result->size - size - 1] = calc;
 		string++;
 	}
@@ -115,7 +111,7 @@ struct LargeInt * NEW_LargeInt_from_str(const char * string, unsigned int size)
 */
 struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 {
-	int iterator_max = max(lia->size, lib->size);
+	unsigned int iterator_max = max(lia->size, lib->size);
 	struct LargeInt * longerOne = (lia->size > lib->size) ? lia : lib;
 	char carry = 0;
 	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
@@ -126,7 +122,7 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 	   1. adds their 2 bytes + carry from last byte, if neither array is at their end yet
 	   2. adds the carry and the byte from the longer one, if one array is at the end
 	   3. appends the carry, or cuts the length, if both are at the end, depending on the carry*/
-	for (int i = 0; i <= iterator_max; ++i)
+	for (unsigned int i = 0; i <= iterator_max; ++i)
 	{
 		//first case
 		if (i < min(lia->size, lib->size))
@@ -135,7 +131,8 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 			result->LInt[i] = (char)(sumcheck % 256);
 			if (sumcheck > 255) {
 				carry = 0x01;
-			}else{
+			}
+			else {
 				carry = 0x00;
 			}
 		}
@@ -145,7 +142,8 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 			result->LInt[i] = (char)(sumcheck % 256);
 			if (sumcheck > 255) {
 				carry = 0x01;
-			}else{
+			}
+			else {
 				carry = 0x00;
 			}
 		}
@@ -186,36 +184,42 @@ char * LargeIntToString_Hex(struct LargeInt * lint)
 
 /* frees the array, and the LargeInt itself, as both have been malloc'd in their life cycle
 */
-void destructor(struct LargeInt * li){
+void destructor(struct LargeInt * li) {
 	free(li->LInt);
 	free(li);
 }
 
-struct LargeInt * bitshiftup(struct LargeInt * li, integer amount){
-	if(amount =< 0){	
+struct LargeInt * bitshiftup(struct LargeInt * li, int amount) {
+	if (amount <= 0) {
 		assert(0);
 	}
-	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));	
+	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
 	char* byteadjustedpointer;
-	if(amount > 8){
-		result->LInt = calloc(li->size + amount/8 + 1 , 1);
-		byteadjustedpointer = result->LInt + amount/8;
+	if (amount > 8) {
+		result->LInt = calloc(li->size + amount / 8 + 1, 1);
+		byteadjustedpointer = result->LInt + amount / 8;
 		amount = amount % 8;
-	}else{
-		byteadjustedpointer = result->LInt;
-		result->LInt = malloc(li->size + 1);
 	}
-	
+	else {
+		result->LInt = malloc(li->size + 1);
+		byteadjustedpointer = result->LInt;
+	}
+
 	char carry = 0x0;
 	short currbyte;
-	for(int i = 0; i<li->size;++i){
+	for (unsigned int i = 0; i < li->size; ++i) {
 		currbyte = (short)li->LInt[i];
 		currbyte = (currbyte << amount);
 		byteadjustedpointer[i] = currbyte | carry;
 		carry = currbyte >> 8;
 	}
-	if(carry != 0x0){
+	if (carry != 0x0) {
 		byteadjustedpointer[li->size] = carry;
+		result->size = li->size + byteadjustedpointer - result->LInt + 1;
+	}
+	else {
+		result->size = li->size + byteadjustedpointer - result->LInt;
+		assert(result->LInt == realloc(result->LInt, result->size));
 	}
 	return result;
 }
@@ -224,5 +228,5 @@ struct LargeInt * bitshiftup(struct LargeInt * li, integer amount){
 */
 char * LargeIntToString_Dec(struct LargeInt * lint)
 {
-
+	return "TAP IN DA MORNIN";
 }

@@ -14,7 +14,7 @@ int main()
 	LargeInt * lia = NEW_LargeInt_from_str("0xffabcd", 0);
 	LargeInt * lib = NEW_LargeInt_from_str("0xff0123", 0);
 	LargeInt * lic = add(lia,lib);
-	
+
 	char * str = LargeIntToString_Hex(lia);
 	printf("%s\n", str);
 	free(str);
@@ -24,6 +24,12 @@ int main()
 	str = LargeIntToString_Hex(lic);
 	printf("%s\n", str);
 	free(str);
+
+	LargeInt * lid = bitshiftup(lia, 1);
+	str = LargeIntToString_Hex(lid);
+	printf("%s\n", str);
+	free(str);
+	destructor(lid);
 
 	unsigned long long pot = 1;
 	double flut = 1;
