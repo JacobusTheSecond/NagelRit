@@ -13,11 +13,11 @@ int main()
 {
 	LargeInt * lia = NEW_LargeInt_from_str("0xff", 0);
 	LargeInt * lib = NEW_LargeInt_from_str("0xff0123", 0);
-	LargeInt * lic = add(lia,lib);
+	LargeInt * lic = add(lia, lib);
 
 	LargeInt * lie = NEW_LargeInt_from_str("0x0111111111111111", 0);
 	LargeInt * lif = NEW_LargeInt_from_str("0x0111111111111111", 0);
-	LargeInt * lig = mult(lie,lif); 
+	LargeInt * lig = mult(lie, lif);
 	LargeInt * lih = divideByTen(lia);
 	LargeInt * lii = divideByTen(lih);
 	LargeInt * lij = divideByTen(lii);
@@ -31,10 +31,10 @@ int main()
 	printf("%s\n", str);
 	free(str);
 
-	LargeInt * lid = bitshiftup(lia,14);
+	LargeInt * lid = bitshiftup(lia, 14);
 	str = LargeIntToString_Hex(lid);
 	printf("%s\n\n", str);
-	free(str);	
+	free(str);
 
 	str = LargeIntToString_Hex(lie);
 	printf("%s\n", str);
@@ -66,11 +66,11 @@ int main()
 
 	LargeInt * lik = NEW_LargeInt_from_str("0x0A", 0);
 	LargeInt * lil = NEW_LargeInt_from_str("0x0A", 0);
-	LargeInt * lim; 
+	LargeInt * lim;
 
-	for(int i=0; i<100;++i){
+	for (int i = 0; i < 100; ++i) {
 		lim = lil;
-		lil = mult(lik,lil);
+		lil = mult(lik, lil);
 		str = LargeIntToString_Dec(lil);
 		printf("%s\n", str);
 		free(str);
@@ -78,18 +78,18 @@ int main()
 		printf("%s\n", str);
 		free(str);
 		destructor(lim);
-		
+
 	}
 
-/*
-	unsigned long long pot = 1;
-	double flut = 1;
-	for (int i = 0; i < 16; i++)
-	{
-		printf("%llu %lf\n", pot, flut);
-		pot *= 16;
-		flut += 1.205;
-	}*/
+	/*
+		unsigned long long pot = 1;
+		double flut = 1;
+		for (int i = 0; i < 16; i++)
+		{
+			printf("%llu %lf\n", pot, flut);
+			pot *= 16;
+			flut += 1.205;
+		}*/
 
 	destructor(lia);
 	destructor(lib);
@@ -107,5 +107,5 @@ int main()
 	destructor(lic);
 	destructor(lid);*/
 	PAUSE
-	return EXIT_SUCCESS;
+		return EXIT_SUCCESS;
 }

@@ -193,18 +193,18 @@ struct LargeInt * bitshiftup(struct LargeInt * li, int amount) {
 	if (amount <= 0) {
 		assert(0);
 	}
-	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));	
+	struct LargeInt * result = (struct LargeInt *) malloc(sizeof(struct LargeInt));
 	unsigned char* byteadjustedpointer;
-	if(amount > 8){
-		result->LInt = calloc(li->size + amount/8 + 1 , 1);
-		byteadjustedpointer = result->LInt + amount/8;
+	if (amount > 8) {
+		result->LInt = calloc(li->size + amount / 8 + 1, 1);
+		byteadjustedpointer = result->LInt + amount / 8;
 		amount = amount % 8;
 	}
 	else {
 		result->LInt = malloc(li->size + 1);
 		byteadjustedpointer = result->LInt;
 	}
-	
+
 	char carry = 0x0;
 	short currbyte;
 	for (unsigned int i = 0; i < li->size; ++i) {
@@ -216,17 +216,18 @@ struct LargeInt * bitshiftup(struct LargeInt * li, int amount) {
 	if (carry != 0x0) {
 		byteadjustedpointer[li->size] = carry;
 		result->size = li->size + byteadjustedpointer - result->LInt + 1;
-	}else{
+	}
+	else {
 		result->size = li->size + byteadjustedpointer - result->LInt;
-		result->LInt = realloc(result->LInt,result->size);
+		result->LInt = realloc(result->LInt, result->size);
 	}
 	return result;
 }
 
 
-struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib){
+struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib) {
 	struct LargeInt * result = malloc(sizeof(struct LargeInt));
-	result->LInt = calloc(lia->size + lib->size,1);
+	result->LInt = calloc(lia->size + lib->size, 1);
 	//TODO cut function at end
 	result->size = lia->size + lib->size;
 
@@ -239,68 +240,69 @@ struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib){
 	unsigned short placeholder = 0x0;
 	short addbyte = 0x0;
 	short currbyte = 0x0;
-	for(int i=0;i<iterator_min;++i){
+	for (int i = 0; i < iterator_min; ++i) {
 		//printf("\n\n\ni = %d\n",i);
 		currbyte = (short)shorterOne->LInt[i];
-		for(int bitit = 0; bitit < 8;bitit++){
-		//printf("   bitit = %d\n",bitit);
-			short bit = (short) currbyte & 0x1;
+		for (int bitit = 0; bitit < 8; bitit++) {
+			//printf("   bitit = %d\n",bitit);
+			short bit = (short)currbyte & 0x1;
 			//printf("   bit = %d\n",bit);
-			if(bit==1){
+			if (bit == 1) {
 				//result add longerOne << bitit
-				for(int j=0;j<longerOne->size || addcarry != 0x0 || shiftcarry !=0x0;++j){
+				for (int j = 0; j < longerOne->size || addcarry != 0x0 || shiftcarry != 0x0; ++j) {
 					//printf("      j = %d\n",j);
-					if(j<longerOne->size){
+					if (j < longerOne->size) {
 						addbyte = longerOne->LInt[j];
 						//printf("            addbyte = %d\n",addbyte);
 						addbyte = addbyte << bitit;
 						//printf("            addbyte = %d\n",addbyte);
-					
+
 						//result[byteadjust+i] += (longerOne[j] << bitit) + addcarry + shiftcarry
-						placeholder = result->LInt[i+j] + (addbyte & 0xff) + addcarry + shiftcarry;
+						placeholder = result->LInt[i + j] + (addbyte & 0xff) + addcarry + shiftcarry;
 						//printf("            placeholder = %d\n",placeholder);
 						addcarry = placeholder >> 8;
-						result->LInt[i+j] = placeholder % 0x100;
+						result->LInt[i + j] = placeholder % 0x100;
 						shiftcarry = addbyte >> 8;
-					}else{
-						placeholder = result->LInt[i+j] + addcarry + shiftcarry;
+					}
+					else {
+						placeholder = result->LInt[i + j] + addcarry + shiftcarry;
 						addcarry = placeholder >> 8;
-						result->LInt[i+j] = placeholder % 0x100;
+						result->LInt[i + j] = placeholder % 0x100;
 						shiftcarry = 0x0;
 
 					}
 				}
 			}
 			currbyte = currbyte >> 1;
-			if(currbyte == 0)break;
+			if (currbyte == 0)break;
 		}
 	}
 	cutEnd(result);
 	return result;
 }
 
-struct LargeInt * oneTenth(int length){
+struct LargeInt * oneTenth(int length) {
 	struct LargeInt * oneTenth = (struct LargeInt *)malloc(sizeof(struct LargeInt));
 	oneTenth->LInt = malloc(length);
 	oneTenth->size = length;
-	for(int i=0;i<length-1;++i){
+	for (int i = 0; i < length - 1; ++i) {
 		oneTenth->LInt[i] = 0x99;
 	}
-	oneTenth->LInt[length-1] = 0x19;
+	oneTenth->LInt[length - 1] = 0x19;
 	oneTenth->LInt[0] = ((oneTenth->LInt[0] & 0xf0) | 0x0A);
 	return oneTenth;
 }
 
-struct LargeInt * divideByTen(struct LargeInt * li){
+struct LargeInt * divideByTen(struct LargeInt * li) {
 	struct LargeInt * oT = oneTenth(li->size + 1);
-	struct LargeInt * ph = mult(li,oT);
+	struct LargeInt * ph = mult(li, oT);
 
 	struct LargeInt * result = (struct LargeInt *)malloc(sizeof(struct LargeInt));
 	result->LInt = malloc(ph->size - li->size);
-	result->size = ph->size-li->size;
+	result->size = ph->size - li->size;
 
-	for(int i=0 ; i+li->size < ph->size ; ++i){
-		result->LInt[i] = ph->LInt[i+oT->size];
+	for (int i = 0; i + li->size < ph->size; ++i) {
+		result->LInt[i] = ph->LInt[i + oT->size];
 	}
 
 
@@ -310,11 +312,11 @@ struct LargeInt * divideByTen(struct LargeInt * li){
 	return result;
 }
 
-void cutEnd(struct LargeInt * li){
-	for(int i=li->size-1;i>=0;i--){
-		if(li->LInt[i] != 0){
-			li->LInt = realloc(li->LInt, i+1);
-			li->size = i+1;
+void cutEnd(struct LargeInt * li) {
+	for (int i = li->size - 1; i >= 0; i--) {
+		if (li->LInt[i] != 0) {
+			li->LInt = realloc(li->LInt, i + 1);
+			li->size = i + 1;
 			return;
 		}
 	}
@@ -322,36 +324,36 @@ void cutEnd(struct LargeInt * li){
 /* TODO: recieves a LargeInt and returns a String, depicting the decimal value of the array
    {&(0x30),1} -> "48"
 */
-short intFromHalfByte(char a){
+short intFromHalfByte(char a) {
 	return ((short)a) * 6 % 10;
 }
-char lowestdigitinDec(struct LargeInt * lint){
-	long long sum = 0;	
-	for(int i=1; i<lint->size;++i){
+char lowestdigitinDec(struct LargeInt * lint) {
+	long long sum = 0;
+	for (int i = 1; i < lint->size; ++i) {
 		sum += intFromHalfByte(lint->LInt[i] & 0x0f) + intFromHalfByte(lint->LInt[i] >> 4 & 0x0f);
 	}
-	sum +=  (lint->LInt[0] & 0x0f) % 10 + intFromHalfByte(lint->LInt[0] >> 4 & 0x0f);
+	sum += (lint->LInt[0] & 0x0f) % 10 + intFromHalfByte(lint->LInt[0] >> 4 & 0x0f);
 	return ((char)(sum % 10)) + '0';
 }
 char * LargeIntToString_Dec(struct LargeInt * lint)
 {
-	if(lint->size == 0){
+	if (lint->size == 0) {
 		return "0";
 	}
-	char * result = calloc(lint->size*2,1);
+	char * result = calloc(lint->size * 2, 1);
 	result[0] = lowestdigitinDec(lint);
 	struct LargeInt* iterator = divideByTen(lint);
 	struct LargeInt* oldLI;
 	int i;
-	for(i=1; iterator->size >1 || (iterator->size == 1 && iterator->LInt[0] != 0x0); ++i){
+	for (i = 1; iterator->size > 1 || (iterator->size == 1 && iterator->LInt[0] != 0x0); ++i) {
 		oldLI = iterator;
 		result[i] = lowestdigitinDec(iterator);
 		iterator = divideByTen(iterator);
 		destructor(oldLI);
 	}
-	char * actualresult = malloc(i+1);
-	for(int j=i-1;j>=0;--j){
-		actualresult[i-1-j] = result[j];
+	char * actualresult = malloc(i + 1);
+	for (int j = i - 1; j >= 0; --j) {
+		actualresult[i - 1 - j] = result[j];
 	}
 	actualresult[i] = 0;
 	free(result);
