@@ -150,7 +150,7 @@ struct LargeInt * add(struct LargeInt* lia, struct LargeInt* lib)
 		//third case
 		else if (i == iterator_max) {
 			if (carry == 0x0) {
-				realloc(result->LInt, iterator_max);
+				result->LInt = realloc(result->LInt, iterator_max);
 				result->size = iterator_max;
 			}
 			else {
@@ -187,6 +187,21 @@ char * LargeIntToString_Hex(struct LargeInt * lint)
 void destructor(struct LargeInt * li) {
 	free(li->LInt);
 	free(li);
+}
+
+void cutEnd(struct LargeInt * li) {
+	for (int i = li->size - 1; i >= 0; i--) {
+		if (li->LInt[i] != 0) {
+			struct LargeInt * asstitsndick = li->LInt;
+			if (i == li->size - 1)
+			{
+				return;
+			}
+			li->LInt = realloc(li->LInt, i + 1);
+			li->size = i + 1;
+			return;
+		}
+	}
 }
 
 struct LargeInt * bitshiftup(struct LargeInt * li, int amount) {
@@ -249,7 +264,7 @@ struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib) {
 			//printf("   bit = %d\n",bit);
 			if (bit == 1) {
 				//result add longerOne << bitit
-				for (int j = 0; j < longerOne->size || addcarry != 0x0 || shiftcarry != 0x0; ++j) {
+				for (unsigned int j = 0; j < longerOne->size || addcarry != 0x0 || shiftcarry != 0x0; ++j) {
 					//printf("      j = %d\n",j);
 					if (j < longerOne->size) {
 						addbyte = longerOne->LInt[j];
@@ -312,15 +327,6 @@ struct LargeInt * divideByTen(struct LargeInt * li) {
 	return result;
 }
 
-void cutEnd(struct LargeInt * li) {
-	for (int i = li->size - 1; i >= 0; i--) {
-		if (li->LInt[i] != 0) {
-			li->LInt = realloc(li->LInt, i + 1);
-			li->size = i + 1;
-			return;
-		}
-	}
-}
 /* TODO: recieves a LargeInt and returns a String, depicting the decimal value of the array
    {&(0x30),1} -> "48"
 */
@@ -329,7 +335,7 @@ short intFromHalfByte(char a) {
 }
 char lowestdigitinDec(struct LargeInt * lint) {
 	long long sum = 0;
-	for (int i = 1; i < lint->size; ++i) {
+	for (unsigned int i = 1; i < lint->size; ++i) {
 		sum += intFromHalfByte(lint->LInt[i] & 0x0f) + intFromHalfByte(lint->LInt[i] >> 4 & 0x0f);
 	}
 	sum += (lint->LInt[0] & 0x0f) % 10 + intFromHalfByte(lint->LInt[0] >> 4 & 0x0f);
