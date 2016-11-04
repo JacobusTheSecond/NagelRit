@@ -11,7 +11,7 @@ typedef struct LargeInt LargeInt;
 
 int main()
 {
-	LargeInt * lia = NEW_LargeInt_from_str("0x0fff", 0);
+	LargeInt * lia = NEW_LargeInt_from_str("0xffff", 0);
 	LargeInt * lib = NEW_LargeInt_from_str("0xff0123", 0);
 	LargeInt * lic = add(lia,lib);
 

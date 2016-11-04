@@ -425,6 +425,7 @@ struct LargeInt * pow(struct LargeInt * lia, struct LargeInt * lib){
 	for(int i=0; i<lib->size;++i){
 		int max = ((i == lib->size-1)?log2(lib->LInt[i]):8);
 		for(int bitit = 0; bitit < max; ++bitit){
+			printf("%d\n",bitit);
 			if((lib->LInt[i] & (0x01 << bitit)) == 0x00){
 				oldLI = aTemp;
 				aTemp = mult(aTemp,aTemp);
