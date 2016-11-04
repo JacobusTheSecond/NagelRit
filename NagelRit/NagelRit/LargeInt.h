@@ -12,4 +12,5 @@ char * LargeIntToString_Dec(struct LargeInt * lint);
 struct LargeInt * divideByMultAndBitshift(struct LargeInt * li, struct LargeInt* oT);
 struct LargeInt * bitshiftup(struct LargeInt * li, int amount);
 struct LargeInt * mult(struct LargeInt * lia, struct LargeInt * lib);
+struct LargeInt * pow(struct LargeInt * lia, struct LargeInt * lib);
 void destructor(struct LargeInt * li);

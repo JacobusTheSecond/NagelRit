@@ -407,3 +407,41 @@ char * LargeIntToString_Dec(struct LargeInt * lint)
 	destructor(oT);
 	return actualresult;
 }
+
+int log2(char a){
+	for(int i=7;i>=0;--i){
+		if((a & (0x01<<i)) != 0){
+			return i+1;
+		}
+	}
+	return 8;
+}
+struct LargeInt * pow(struct LargeInt * lia, struct LargeInt * lib){
+	struct LargeInt* result = NEW_LargeInt_from_str("0x01",0);
+	struct LargeInt* aTemp = lia;
+	struct LargeInt* oldLI;
+	int notyet = 1;
+	cutEnd(lib);
+	for(int i=0; i<lib->size;++i){
+		int max = ((i == lib->size-1)?log2(lib->LInt[i]):8);
+		for(int bitit = 0; bitit < max; ++bitit){
+			if((lib->LInt[i] & (0x01 << bitit)) == 0x00){
+				oldLI = aTemp;
+				aTemp = mult(aTemp,aTemp);
+				if(notyet ==0){destructor(oldLI);}
+				notyet = 0;
+			}else{
+				oldLI = result;
+				result = mult(result,aTemp);
+				destructor(oldLI);
+				oldLI = aTemp;
+				aTemp = mult(aTemp,aTemp);
+				if(notyet == 0){destructor(oldLI);}
+				notyet = 0;
+			}
+			cutEnd(aTemp);
+		}
+	}
+	cutEnd(result);
+	return result;
+}
